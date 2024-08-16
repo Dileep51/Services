@@ -9,7 +9,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 // Checkout your code from the repository
-                git branch: 'main', url: 'https://github.com/Dileep51/services.git'
+                git branch: 'master', url: 'https://github.com/Dileep51/services.git'
             }
         }
 
