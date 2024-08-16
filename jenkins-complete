@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_IMAGE = "springboot-app:latest"  // Change this to your desired Docker image name
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Checkout your code from the repository
+                git branch: 'main', url: 'https://github.com/Dileep51/services.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Compile your Spring Boot app using Maven
+                bat 'mvn clean package'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                // Run tests
+                bat 'mvn test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // Build the Docker image
+                bat "docker build -t %DOCKER_IMAGE% ."
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    // Stop and remove the previous Docker container (if it exists)
+                    bat """
+                    docker stop springboot-container || exit 0
+                    docker rm springboot-container || exit 0
+                    """
+
+                    // Run the new Docker container
+                    bat "docker run -d -p 8080:8080 --name springboot-container %DOCKER_IMAGE%"
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            // Clean up workspace after build
+            cleanWs()
+        }
+        success {
+            echo 'Build, Test, and Deployment successful!'
+        }
+        failure {
+            echo 'Build, Test, or Deployment failed.'
+        }
+    }
+}
