@@ -16,7 +16,21 @@ pipeline {
         stage('Build') {
             steps {
                 // Compile your Spring Boot app using Maven
-                bat 'mvn clean package'
+                bat 'mvn clean'
+            }
+        }
+        stage('SonarQube Analysis') {
+              steps {
+        		withSonarQubeEnv('My SonarQube Server') {
+        		bat 'mvn sonar:sonar -Dsonar.login=your_auth_token'
+       			}
+      		  }
+    	}
+        
+        stage('package') {
+            steps {
+                // Compile your Spring Boot app using Maven
+                bat 'mvn package'
             }
         }
 
